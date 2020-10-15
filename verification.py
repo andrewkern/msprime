@@ -822,7 +822,7 @@ class DiscoalSweeps(DiscoalTest):
         self._run(cmd)
 
     def test_sweep_ex1(self):
-        cmd = "10 1000 10000 -t 10.0 -r 10.0 -ws 0 -a 500 -x 0.5 -N 10000"
+        cmd = "10 1000 10000 -t 10.0 -r 0.0 -ws 0 -a 500 -x 0.5 -N 10000"
         self._run(cmd)
 
     def test_sweep_ex2(self):
