@@ -4884,7 +4884,7 @@ out:
 }
 
 static int
-msp_run_sweep(msp_t *self)
+msp_run_sweep(msp_t *self, double max_time, unsigned long max_events)
 {
     int ret = 0;
     simulation_model_t *model = &self->model;
@@ -4918,16 +4918,7 @@ msp_run_sweep(msp_t *self)
     p_coal_B = 0;
     p_rec_b = 0;
     p_rec_B = 0;
-    /* JK: I've removed the time and event limits on this function to simplify
-     * things as function is currently 'non-rentrant'; we can't stop in the middle
-     * of the sweep and pick it up again from where we left off later. This is
-     * different to all the other model runners. Probably the simplest thing to
-     * do here is to make the trajectory times absolute wrt to the simulation, and
-     * to then increment curr_step accordingly. We can then probably reason about
-     * when the call msp_sweep_initialise and msp_sweep_finalise
-     * depending on the value of curr_step, and hopefully reintroduce the max_time
-     * and max_steps parameters. */
-
+    
     ret = model->params.sweep.generate_trajectory(
         &model->params.sweep, self, &num_steps, &time, &allele_frequency);
     t_start = self->time;
@@ -4942,6 +4933,10 @@ msp_run_sweep(msp_t *self)
 
     curr_step = 0;
     while (msp_get_num_ancestors(self) > 0 && curr_step < num_steps) {
+        if (events == max_events) {
+            ret = MSP_EXIT_MAX_EVENTS;
+            break;
+        }
         events++;
         /* Set pop sizes & rec_rates */
         for (j = 0; j < self->num_labels; j++) {
@@ -4997,7 +4992,13 @@ msp_run_sweep(msp_t *self)
         e_sum = p_coal_b;
         /* convert time scale */
         pop_size = get_population_size(&self->populations[0], self->time);
-        self->time = t_start + (time[curr_step - 1] * self->ploidy * pop_size);
+        t_temp = t_start + (time[curr_step - 1] * self->ploidy * pop_size);
+        /* ask if event is within time horizon */
+        if (t_temp >= max_time) {
+            ret = MSP_EXIT_MAX_TIME;
+            break;
+        }
+        self->time = t_temp;
         if (tmp_rand < e_sum / sweep_pop_tot_rate) {
             /* coalescent in b background */
             ret = self->common_ancestor_event(self, 0, 0);
