@@ -4888,11 +4888,11 @@ msp_run_sweep(msp_t *self, double max_time, unsigned long max_events)
 {
     int ret = 0;
     simulation_model_t *model = &self->model;
-    size_t curr_step = 0;
     size_t num_steps;
     double *allele_frequency = NULL;
     double *time = NULL;
     double sweep_locus = model->params.sweep.position;
+    size_t curr_step = model->params.sweep.curr_step;
     double sweep_dt;
     size_t j = 0;
     double recomb_mass;
@@ -4931,7 +4931,6 @@ msp_run_sweep(msp_t *self, double max_time, unsigned long max_events)
         goto out;
     }
 
-    curr_step = 0;
     while (msp_get_num_ancestors(self) > 0 && curr_step < num_steps) {
         if (events == max_events) {
             ret = MSP_EXIT_MAX_EVENTS;
@@ -4980,6 +4979,7 @@ msp_run_sweep(msp_t *self, double max_time, unsigned long max_events)
             */
             event_prob *= 1.0 - total_rate;
             curr_step++;
+            printf("curr_step: %d ")
 
             sweep_over = total_rate == 0;
         }
@@ -6939,6 +6939,7 @@ msp_set_simulation_model_sweep_genic_selection(msp_t *self, double position,
     trajectory->end_frequency = end_frequency;
     trajectory->s = s;
     trajectory->dt = dt;
+    trajectory->curr_Step = 0;
 out:
     return ret;
 }

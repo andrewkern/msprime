@@ -145,11 +145,14 @@ typedef struct {
 struct _msp_t;
 
 typedef struct {
-    /* TODO document these parameters.*/
+    /* params associated with a trajectory */
     double start_frequency;
     double end_frequency;
     double s;
     double dt;
+    /* track how far along trajectory we have progressed
+       with curr_step */
+    size_t curr_step;
 } genic_selection_trajectory_t;
 
 typedef struct _sweep_t {
