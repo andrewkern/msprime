@@ -1131,7 +1131,8 @@ mutgen_place_mutations(mutgen_t *self, bool discrete_sites)
                     }
                     search.position = position;
                     avl_node = avl_search(&self->sites, &search);
-                } while (avl_node != NULL && !discrete_sites);
+                } while (
+                    (avl_node != NULL && !discrete_sites) || !(position < site_right));
 
                 time = gsl_ran_flat(self->rng, branch_start, branch_end);
                 tsk_bug_assert(site_left <= position && position < site_right);
